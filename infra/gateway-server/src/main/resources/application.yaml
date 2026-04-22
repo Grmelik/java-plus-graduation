@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: gateway
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        serviceId: config-server
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 6000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,gateway  # gateway специфичные эндпоинты
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    gateway:
+      enabled: true  # включить эндпоинты gateway
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+    hostname: localhost
+    instance-id: "${spring.application.name}:${random.value}"
+    leaseRenewalIntervalInSeconds: 10
+
+logging:
+  level:
+    com.netflix: WARN
+    org.springframework.cloud: INFO
+    ru.practicum: DEBUG
