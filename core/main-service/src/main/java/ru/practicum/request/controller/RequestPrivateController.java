@@ -9,7 +9,6 @@ import ru.practicum.request.service.RequestService;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}/requests")

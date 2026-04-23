@@ -15,7 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/admin/users")
-@Validated
 public class UserAdminController {
     private final UserService userService;
 
