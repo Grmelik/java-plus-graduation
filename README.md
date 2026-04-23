@@ -122,3 +122,10 @@ API основного сервиса разделен на три части:
 | ----- | :----- | ------------------------------------------ |
 | POST  | /hit   | Сохранить информацию о запросе к эндпоинту |
 | GET   | /stats | Получить статистику по посещениям          |
+
+
+---
+## Порядок запуска
+
+docker-compose.yml >> infra/discovery-server >> infra/config-server >>
+stats/stats-server >> core/main-service >> infra/gateway-server
