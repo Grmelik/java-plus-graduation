@@ -35,7 +35,6 @@ eureka:
       defaultZone: http://${eureka.instance.hostname:localhost}:${eureka.instance.port:8761}/eureka/
     registry-fetch-interval-seconds: 5
   instance:
-    hostname: localhost
     instance-id: ${spring.application.name}:${random.value}
     lease-renewal-interval-in-seconds: 10
 

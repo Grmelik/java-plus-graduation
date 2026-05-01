@@ -1,6 +1,6 @@
 spring:
   application:
-    name: gateway
+    name: gateway-server
   config:
     import: "configserver:"
   cloud:
@@ -31,11 +31,8 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
   instance:
-    preferIpAddress: true
-    hostname: localhost
     instance-id: "${spring.application.name}:${random.value}"
     leaseRenewalIntervalInSeconds: 10
-
 logging:
   level:
     com.netflix: WARN

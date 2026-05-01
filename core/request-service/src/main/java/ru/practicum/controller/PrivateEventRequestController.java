@@ -28,6 +28,7 @@ public class PrivateEventRequestController {
     @GetMapping
     public List<ParticipationRequestDto> getUserEventRequests(@PathVariable Long userId,
                                                               @PathVariable Long eventId) {
+        log.debug("GET /users/{}/events/{}/requests", userId, eventId);
         return requestService.getUserEventRequests(userId, eventId);
     }
 

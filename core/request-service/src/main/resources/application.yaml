@@ -18,8 +18,6 @@ server:
 
 eureka:
   instance:
-    prefer-ip-address: true
-    hostname: ${spring.application.name}
     instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     healthcheck:
