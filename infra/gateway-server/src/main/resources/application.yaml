@@ -17,14 +17,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,gateway  # gateway специфичные эндпоинты
+        include: health,info,metrics,gateway
   endpoint:
     health:
       show-details: always
       probes:
         enabled: true
     gateway:
-      enabled: true  # включить эндпоинты gateway
+      enabled: true
 
 eureka:
   client:

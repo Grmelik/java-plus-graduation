@@ -8,7 +8,7 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true
+          enabled: false
           lower-case-service-id: true
       routes:
         - id: comment_service
@@ -24,7 +24,7 @@ spring:
             - Path=/admin/events/**,/events/**,/users/*/events/**,/admin/categories/**,/categories/**,/admin/compilations/**,/compilations/**
           filters:
             - StripPrefix=0
-            -
+
         - id: request_service
           uri: lb://REQUEST-SERVICE
           predicates:
