@@ -11,11 +11,12 @@ import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.dto.request.RequestStatus;
 import ru.practicum.dto.event.EventState;
+import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.feign.EventClient;
-import ru.practicum.feign.UserClient;
+import ru.practicum.feign.EventClientService;
+import ru.practicum.feign.UserClientService;
 import ru.practicum.mapper.RequestMapper;
 import ru.practicum.model.Request;
 import ru.practicum.repository.RequestRepository;
@@ -30,28 +31,35 @@ import java.util.List;
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
-    private final UserClient userClient;
-    private final EventClient eventClient;
+    private final EventClientService eventClientService;
+    private final UserClientService userClientService;
 
     @Override
     public List<ParticipationRequestDto> getUserEventRequests(Long userId, Long eventId) {
+        log.info("==> getUserEventRequests: userId={}, eventId={}", userId, eventId);
+
         checkUserExists(userId);
-        EventFullDto event = eventClient.getEvent(eventId);
+        EventFullDto event = eventClientService.getEvent(eventId);
 
         if (!event.getInitiator().getId().equals(userId)) {
+            log.warn("Пользователь userId={} не является создателем события eventId={}", userId, eventId);
             throw new ValidationException("Пользователь с id=" + userId + " не является создателем события");
         }
 
-        log.info("Получение информации о запросах на участие в событии с id={}", eventId);
         List<Request> requests = requestRepository.findByEventId(eventId);
+        log.info("==> getUserEventRequests: найдено {} запросов для события eventId={}", requests.size(), eventId);
+
         return requestMapper.toDtoList(requests);
     }
 
     @Override
     @Transactional
     public EventRequestStatusUpdateResult updateUserEventRequests(Long userId, Long eventId, EventRequestStatusUpdateRequest dto) {
+        log.info("==> updateUserEventRequests: userId={}, eventId={}, requestIds={}, newStatus={}",
+                userId, eventId, dto.getRequestIds(), dto.getStatus());
+
         checkUserExists(userId);
-        EventFullDto event = eventClient.getEvent(eventId);
+        EventFullDto event = eventClientService.getEvent(eventId);
 
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ValidationException("Пользователь с id=" + userId + " не является создателем события");
@@ -143,7 +151,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
         checkUserExists(userId);
-        EventFullDto event = eventClient.getEvent(eventId);
+        EventFullDto event = eventClientService.getEvent(eventId);
 
         if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
             throw new ConflictException("Нельзя добавить повторный запрос");
@@ -195,11 +203,15 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void checkUserExists(Long userId) {
+        log.debug("Проверка существования пользователя с id={}", userId);
         try {
-            userClient.getUser(userId);
+            UserShortDto user = userClientService.getUser(userId);
+            log.info("Пользователь с id={} найден: {}", userId, user.getName());
         } catch (FeignException.NotFound e) {
+            log.error("Пользователь с id={} не найден", userId);
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         } catch (FeignException e) {
+            log.warn("Сервис пользователей недоступен при проверке userId={}, статус: {}", userId, e.status());
             log.warn("Сервис пользователей недоступен, операция может быть выполнена некорректно");
         }
     }
