@@ -1,10 +1,12 @@
 package ru.practicum.service;
 
+import com.google.protobuf.Timestamp;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.client.CollectorClient;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
@@ -12,6 +14,8 @@ import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.dto.request.RequestStatus;
 import ru.practicum.dto.event.EventState;
 import ru.practicum.dto.user.UserShortDto;
+import ru.practicum.ewm.stats.proto.ActionTypeProto;
+import ru.practicum.ewm.stats.proto.UserActionProto;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
@@ -21,6 +25,7 @@ import ru.practicum.mapper.RequestMapper;
 import ru.practicum.model.Request;
 import ru.practicum.repository.RequestRepository;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +38,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper requestMapper;
     private final EventClientService eventClientService;
     private final UserClientService userClientService;
+    private final CollectorClient collectorClient;
 
     @Override
     public List<ParticipationRequestDto> getUserEventRequests(Long userId, Long eventId) {
@@ -184,6 +190,8 @@ public class RequestServiceImpl implements RequestService {
 
         request = requestRepository.save(request);
 
+        sendRegisterAction(userId, eventId);
+
         log.info("Добавление нового запроса на участие в событии с id={} от пользователя с id={}", eventId, userId);
         return requestMapper.toDto(request);
     }
@@ -212,7 +220,6 @@ public class RequestServiceImpl implements RequestService {
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         } catch (FeignException e) {
             log.warn("Сервис пользователей недоступен при проверке userId={}, статус: {}", userId, e.status());
-            log.warn("Сервис пользователей недоступен, операция может быть выполнена некорректно");
         }
     }
 
@@ -239,6 +246,25 @@ public class RequestServiceImpl implements RequestService {
             if (!req.getEventId().equals(eventId)) {
                 throw new ConflictException("Запрос с id=" + req.getId() + " не относится к событию с id=" + eventId);
             }
+        }
+    }
+
+    private void sendRegisterAction(Long userId, Long eventId) {
+        try {
+            UserActionProto action = UserActionProto.newBuilder()
+                    .setUserId(userId)
+                    .setEventId(eventId)
+                    .setActionType(ActionTypeProto.REGISTER)
+                    .setTimestamp(Timestamp.newBuilder()
+                            .setSeconds(Instant.now().getEpochSecond())
+                            .setNanos(Instant.now().getNano())
+                            .build())
+                    .build();
+
+            collectorClient.sendUserAction(action);
+            log.debug("Отправлена регистрация в Collector: userId={}, eventId={}", userId, eventId);
+        } catch (Exception e) {
+            log.error("Ошибка отправки регистрации в Collector: {}", e.getMessage(), e);
         }
     }
 }

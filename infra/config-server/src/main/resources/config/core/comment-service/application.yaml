@@ -24,3 +24,7 @@ stats-server:
 logging:
   level:
     root: INFO
+
+grpc:
+  server:
+    port: -1
