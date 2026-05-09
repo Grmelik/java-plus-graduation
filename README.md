@@ -172,3 +172,11 @@
 - ✅ Collector Service
 - ✅ Aggregator Service (gRPC:9090)
 - ✅ Analyzer Service
+
+---
+## Тестирование
+В случае локального тестирования (на локальном компьютере) надо добавить в application.yaml каждого микросервиса настройки:
+
+eureka.instance.prefer-ip-address: true     # используем IP вместо hostname
+
+eureka.instance.ip-address: 127.0.0.1       # явно указываем IP
