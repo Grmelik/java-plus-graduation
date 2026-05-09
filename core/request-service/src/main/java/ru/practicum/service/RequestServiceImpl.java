@@ -29,7 +29,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
     private final RequestMapper requestMapper;
