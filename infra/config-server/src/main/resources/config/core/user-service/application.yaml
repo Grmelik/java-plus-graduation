@@ -23,4 +23,11 @@ stats-server:
 
 logging:
   level:
-    root: INFO
+    com.zaxxer.hikari: DEBUG
+    org.springframework.jdbc: DEBUG
+    org.hibernate: DEBUG
+    ru.practicum: DEBUG
+
+grpc:
+  server:
+    port: -1

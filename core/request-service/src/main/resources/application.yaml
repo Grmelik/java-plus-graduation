@@ -18,6 +18,7 @@ server:
 
 eureka:
   instance:
+    hostname: localhost
     instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     healthcheck:

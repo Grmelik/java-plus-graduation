@@ -3,8 +3,6 @@ package ru.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.dto.request.RequestStatus;
@@ -26,13 +24,9 @@ public class InternalRequestController {
         return requestRepository.countByEventIdAndStatus(eventId, status);
     }
 
-    @PostMapping("/events/count/confirmed")
-    public Map<Long, Long> getConfirmedRequestsCount(@RequestBody List<Long> eventIds) {
-        List<Object[]> results = requestRepository.countConfirmedByEventIds(eventIds);
-        return results.stream()
-                .collect(Collectors.toMap(
-                        row -> (Long) row[0],
-                        row -> (Long) row[1]
-                ));
+    @GetMapping("/user/{userId}/event/{eventId}/confirmed")
+    public Boolean hasUserConfirmedRequest(@PathVariable Long userId, @PathVariable Long eventId) {
+        return requestRepository.existsByRequesterIdAndEventIdAndStatus(
+                userId, eventId, RequestStatus.CONFIRMED);
     }
 }

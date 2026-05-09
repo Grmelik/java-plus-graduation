@@ -1,0 +1,31 @@
+kafka:
+  bootstrap-servers: localhost:9092
+  bootstrap:
+    servers: localhost:9092
+  topics:
+    stats-user-action-v1: stats.user-actions.v1
+    stats-events-similarity-v1: stats.events-similarity.v1
+
+grpc:
+  server:
+    port: 0
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:15432/stat-db
+    username: stat-db
+    password: stat-db
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    ru.practicum: DEBUG
+    org.springframework.kafka: DEBUG
